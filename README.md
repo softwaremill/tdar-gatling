@@ -1,14 +1,12 @@
-# Environment setup
-	https://github.com/excilys/gatling/wiki/HTTP#os-tuning-
+# Gatling 
+
+[Gatling](http://gatling-tool.org/)
+
+[Getting started](https://github.com/excilys/gatling/wiki/Getting-Started)
 
 
-## First scenario
-	1. The user accesses to the application
-	
-## Extra scenario
+## Firing tests
 
-    1. The user accesses to the application
-    2. The user enters its credentials and logs in
-    3. The user accesses to the details of one of its accounts
-    4. The user accesses to the operations of the previous month
-    5. The user logs out
+					cd ~/gatling/bin
+		Basic: 		./gatling.sh -s tdar.TdarSimulation
+		Logged: 	./gatling.sh -s tdar.TdarLoggedSimulation
