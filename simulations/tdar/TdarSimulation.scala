@@ -15,7 +15,6 @@ class TdarSimulation extends Simulation {
 		.acceptCharsetHeader("ISO-8859-1,utf-8;q=0.7,*;q=0.7")
 		.acceptHeader("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
 		.acceptEncodingHeader("gzip, deflate")
-		// .acceptLanguageHeader("fr,fr-fr;q=0.8,en-us;q=0.5,en;q=0.3")
 		.disableFollowRedirect
 
 	val headers_1 = Map(
@@ -48,69 +47,15 @@ class TdarSimulation extends Simulation {
       				.exec(
         				http("View a random document")
           				.get("/document/${documentId}")
-          				.check(status.is(200)))
+          				.check(status.is(200))
+          			)
+          			.pause(6, 9)
     				}
     		}
-    	.group("UserLogged") {			
-				exec(
-					http("AccessLoginPage")
-						.get("/login")
-						.headers(headers_1)
-				)
-				.pause(12, 13)
-				.feed(csv("tdar_credentials.csv"))
-				.exec(
-					http("Login")
-						.post("/login/process")
-						.param("loginUsername", "${username}")
-						.param("loginPassword", "${password}")
-						.headers(headers_3)
-						.check(status.is(302))
-				)		
-		.pause(0 milliseconds, 100 milliseconds)
-		.repeat(2) {
-			exec(
-				http("Dashboard")
-					.get("/dashboard")
-					.headers(headers_1)
-					.check(status.is(200))
-					.check(regex("""<h1>(.*)'s Dashboard</h1>""").exists)
-				)
-				.pause(7, 8)
-				.exec(
-					http("CreatingNewResource")
-						.get("/resource/add")
-						.headers(headers_1)
-						.check(regex("""<h1>Create &amp; <span>Organize</span> Resources</h1>""").exists)
-					)
-				.pause(100 milliseconds, 200 milliseconds)
-				.exec(
-					http("SearchForArcheology")
-						.get("/search/results?query=archeology")
-						.headers(headers_1)
-						.check(status.is(200))
-					)
-		}.exec(
-			http("Logout")
-				.get("/logout")
-				.headers(headers_1)
-				.check(status.is(302))
-		)
-	}
-		.pause(0 milliseconds, 100 milliseconds)
-		.exec(
-			http("LoginAgain")
-				.get("/login")
-				.headers(headers_1)
-				.check(status.is(200))
-		)
-// rampRate(10 usersPerSec) to(100 usersPerSec) during(5 minutes)
-// ramp(3 users) over (10 seconds)
-// ramp(3 users) over (10 seconds)
-	setUp(scn.inject(ramp(1 users) over (10 seconds)))
-	// setUp(scn.inject(rampRate(3 usersPerSec) to(15 usersPerSec) during(1 minutes)))
+
+	setUp(scn.inject(ramp(30 users) over (60 seconds)))
+	// setUp(scn.inject(constantRate(3 usersPerSec) during (15 seconds)))
+	// setUp(scn.inject(nothingFor(30 seconds), ramp(30 users) over (60 seconds)))
+	// setUp(scn.inject(rampRate(1 usersPerSec) to(1 usersPerSec) during(1 minutes)))
 		.protocols(httpProtocol)
-		.assertions(
-			global.successfulRequests.percent.is(100), details("Login" / "AccessLoginPage").responseTime.max.lessThan(2000),
-			details("Logout").requestsPerSec.greaterThan(10))
 }
